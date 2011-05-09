@@ -19,7 +19,7 @@ import pdb,traceback
 # initialise constants and variables
 
 
-savedir = "/Users/wojciechziniewicz/python/img"                        # default to current directory
+savedir = "/home/wojtek/hlsir/img"                        # default to current directory
 fnQueue = "bc_queue.bcl"                 # list of URLs to be visited
 fnVisited = "bc_visited.bcl"             # list of visited URLs
 fnBackgrounds = "bc_backgrounds.bcl"     # list of urls which denied access or other error
