@@ -53,16 +53,15 @@ def form(posturl,button):
     print """
     <html>
     <head>
+    <link rel="stylesheet" type="text/css" href="hls.css" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>HLS image search</title>
-    <center>
 
+<body>
 <form action="%s" method="POST" enctype="multipart/form-data">
-
 <input name="file.1" type="file" ">
 
 <BR>
-<P>
 Slice priority :
 <table>
 <tr>
@@ -104,19 +103,7 @@ Slice priority :
 <br>
 <input name="submit" %s>
 </form>
-</center>
-<div style="min-height:3.5em"><br>
-</div>
-<div id=res>
-</div>
-<span id=footer>
-<center id=fctr>
-<div style="font-size:10pt"><div id=fll style="margin:19px auto 19px auto;text-align:center">
-<a href="about.html">About</a>
-</div>
-</div>
-</center>
-</span>
+</body>
 """ % (posturl,button)
 ########################################################################################
 
