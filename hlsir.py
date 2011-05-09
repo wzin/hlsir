@@ -32,11 +32,10 @@ crawler_img_library = "/Users/wojciechziniewicz/python/img"
 repetitiveness = 0
 
 try:
-    conn = MySQLdb.connect (host = "127.0.0.1", user = "root", passwd = "", db = "crawlerbase")
+    conn = MySQLdb.connect (host = "10.0.0.1", user = "root", passwd = "", db = "crawlerbase")
 except MySQLdb.Error, e:
     print "Error %d: %s" % (e.args[0], e.args[1])
     sys.exit(1)
-    
     
 def normalizeRGBVector(color):
     return color[0]/255.0, color[1] / 255.0, color[2] / 255.0
