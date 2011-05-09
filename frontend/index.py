@@ -55,17 +55,7 @@ def form(posturl,button):
     <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>HLS image search</title>
-    <textarea id=csi style=display:none></textarea>
-    <div id=mngb>
-    <div id=gog>
-    <div class=gbh style=left:0>
-    </div>
-    <div class=gbh style=right:0>
-    </div>
-    </div>
-    </div>
     <center>
-    <br clear=all id=lgpd>
 
 <form action="%s" method="POST" enctype="multipart/form-data">
 
@@ -114,7 +104,7 @@ Slice priority :
 <br>
 <input name="submit" %s>
 </form>
-
+</center>
 <div style="min-height:3.5em"><br>
 </div>
 <div id=res>
