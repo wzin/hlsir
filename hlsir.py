@@ -5,9 +5,7 @@ Created on Jul 14, 2010
 TODO : hlsir.returnFLatHlsEquivalent() should accept "LIMIT sliceX*sliceY" format
 '''
 
-
 import Image,numpy,colorsys,os,MySQLdb,sys,urlparse
-
 from BeautifulSoup import BeautifulSoup as bs
 from urllib2 import urlopen
 from HTMLParser import HTMLParseError
@@ -27,16 +25,16 @@ ALPHA         = 0.6
 HLS_VECTOR    = numpy.zeros((sliceX,sliceY,3)) 
 INPUT_VECTOR  = numpy.zeros((sliceX,sliceY,3))
 IMPORTANCE_MATRIX = numpy.zeros((sliceX,sliceY))
-frontend_upload_dir = "/Users/wojciechziniewicz/python/HLS/analysis/frontend/upload"
-crawler_img_library = "/Users/wojciechziniewicz/python/img"
+frontend_upload_dir = "/home/wojtek/hlsir/frontend/upload"
+crawler_img_library = "/home/wojtek/hlsir/img"
 repetitiveness = 0
 
 try:
-    conn = MySQLdb.connect (host = "10.0.0.1", user = "root", passwd = "", db = "crawlerbase")
+    conn = MySQLdb.connect (host = "127.0.0.1", user = "root", passwd = "dup4", db = "crawlerbase")
 except MySQLdb.Error, e:
     print "Error %d: %s" % (e.args[0], e.args[1])
     sys.exit(1)
-    
+
 def normalizeRGBVector(color):
     return color[0]/255.0, color[1] / 255.0, color[2] / 255.0
 
@@ -58,10 +56,8 @@ def mysqlInsertImage(md5,os_path,height,width,URL,parent_url,HLS_VECTOR):
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit (1)
-        
-        
 
-    
+
 def mysqlInsertVector(md5,HLS_VECTOR):
     "inserts the given HLS vector into the database"
     cursor = conn.cursor ()
@@ -109,7 +105,7 @@ def mysqlInsertVector(md5,HLS_VECTOR):
         except MySQLdb.Error, e:
             print "Error %d: %s" % (e.args[0], e.args[1])
             print "Didnt succeed inserting vector into DB"
-        
+
 def reportShapeInfo(infile):
     global sliceX,sliceY
     fileHandler = Image.open(infile)
@@ -160,16 +156,16 @@ def constructHLSQuery(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
         SELECT image_md5 from vectors WHERE
         %s """) % (arguments) 
         """print query"""
-        
+
         cursor.execute (query)
         md5 = cursor.fetchall()
         cursor.close ()
-        
+
         return md5
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed SELECTING vector FROM DB"
-        
+
 def constructHLSQuery2(hlsvector,mask,modificator,global_deviation):
     """ Suma wszystkich wartosci bezwzglednych odstepstwa wszystkich elementow 
     kazdego wektora od kazdego elementu wektora wejsciowego
