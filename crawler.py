@@ -20,6 +20,7 @@ import pdb,traceback
 
 savedir = "/home/wojtek/hlsir/img"                        # default to current directory
 fnMsg = "crawler.sig"                        # semaphor file to shut down or send messages    
+fnMD5 = "md5s.list"
 
 visited = hlsir.visited           # list of visited URLs
 tmp_visited = hlsir.tmp_visited
@@ -533,6 +534,7 @@ try:
             hlsir.repetitiveness = 0
             print "*reseting queue (flushing)"
             cursor.execute ("delete from queue")
+            cursor.commit()
             while not Q.empty():
                 tmp = Q.get_nowait()
             "*reseting queue (re-reading)"
