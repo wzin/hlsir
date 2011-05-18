@@ -18,15 +18,8 @@ import pdb,traceback
 
 # initialise constants and variables
 
-
 savedir = "/home/wojtek/hlsir/img"                        # default to current directory
-fnQueue = "bc_queue.bcl"                 # list of URLs to be visited
-fnVisited = "bc_visited.bcl"             # list of visited URLs
-fnBackgrounds = "bc_backgrounds.bcl"     # list of urls which denied access or other error
-fnNoAccess = "bc_noaccess.bcl"           # list of background graphic urls
-fnMD5 = "bc_md5.bcl"                     # list of MD5 fingerprints of all downloaded graphics
-fnStats = "bc_stats.bcl"                 # save statistics between sessions
-fnMsg = "bc.kill"                        # semaphor file to shut down or send messages    
+fnMsg = "crawler.sig"                        # semaphor file to shut down or send messages    
 
 visited = hlsir.visited           # list of visited URLs
 tmp_visited = hlsir.tmp_visited
@@ -49,16 +42,16 @@ chrAdd  = "+"
 chrMsg  = "="
 chrDebug = "#"
 
-maxVisitsBeforeSave = 3           # number of sites to visit before saving all lists and syncing to database
+maxVisitsBeforeSave = 10           # number of sites to visit before saving all lists and syncing to database
 maxQueueSize = 1000               # maximum size to let the queue grow to
-maxQueueSizeReduce = 80           # percentage to remove when queue too big
+maxQueueSizeReduce = 99           # percentage to remove when queue too big
 queue_cleanup_treshold  = 10
 
 # here are some starting points if now initial URL is given.
 start = [
             'http://www.randomwebsite.com/cgi-bin/random.pl',
             'http://random.yahoo.com/bin/ryl '
-	   ]
+            ]
 
 # this is to track totals between sessions, but isn't implemented
 stats = { 'total_kCrawled' : 0, 'total_bgBytes' : 0 }
@@ -156,8 +149,6 @@ def writeQueue():
     except MySQLdb.Error, e:
         print "An error has been passed -> %s" %e
         print "Could not insert item into DB"
-    
-        
 def reduceQueue(p,msg=""):
     "reduce the Queue loosing a certain percentage of random strings"
     if p<1 or p>99:
@@ -207,8 +198,9 @@ def processMsg():
                 reduceQueue(string.atoi(string.strip(l[7:])),chrMsg+" Dropped %s Urls (approx %s%% of Queue).")
                 keepon = 1
             if string.find(l,'save')==0:
-                print "Crawled %d bytes of HTML, and %d bytes of backgrounds." % (kCrawled,bgBytes)
+                print "Crawled exactly %d bytes of HTML, and %d bytes of backgrounds. Shutting down current thread" % (kCrawled,bgBytes)
                 syncWithDB()
+                print "Now syncing with DB"
                 visitcount=0
                 keepon = 1
             if string.find(l,'kill')==0:
@@ -429,7 +421,6 @@ def suckBG(u,url):
 # ===================================================================
 # ===================================================================
 
-# if an arg on command line then push it into the Queue so it's first
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'f:hr:s:')
 except getopt.error, msg:
@@ -554,12 +545,8 @@ try:
                 except MySQLdb.Error, e:
                     print "An error has been passed -> %s" %e
                     sys.exit (1)
-            
 
-
-            
 except KeyboardInterrupt:
     print " shutting down... %d urls in queue... " % Q.qsize()
     syncWithDB()
 print "Crawled %d bytes of HTML, and %d bytes of backgrounds." % (kCrawled,bgBytes)
-

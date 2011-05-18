@@ -198,7 +198,6 @@ def constructHLSQuery2(hlsvector,mask,modificator,global_deviation):
                     else:
                         arguments = arguments+"))) < 13"
                         continue
-                    
         query = ("""
         SELECT image_md5 from vectors WHERE
         %s """) % (arguments) 
@@ -210,7 +209,6 @@ def constructHLSQuery2(hlsvector,mask,modificator,global_deviation):
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed SELECTING vector FROM DB"
-    
 def constructHLSQuery3(hlsvector,parameter,mask,modificator):
     """Suma errorow na elementach kazdego wektora (slice'a) musi byc mniejsza
     od ustalonego parametru """
