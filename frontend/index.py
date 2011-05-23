@@ -9,7 +9,7 @@ import cgitb
 cgitb.enable()
 
 import sys
-sys.path.insert(0, '/var/www/hls/')
+sys.path.insert(0, '/home/wojtek/hlsir/')
 import os,cgi,glob,string,hlsir,Image,time
 
 HLS_VECTOR = hlsir.HLS_VECTOR
