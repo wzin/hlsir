@@ -123,9 +123,12 @@ def reportShapeInfo(infile):
         heightUnit = (divmod(imageArray.shape[1] , sliceY)[0])-1
     return totalWidth,totalHeight,widthUnit,heightUnit #integers
 
-def constructHLSQuery(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
     """Kazdy badany element, kazdego porownywanego wektora HLS moze miec 
-    sztywno ustalona maksymalna roznice od korelowanego elementu wektora wejsciowego """
+    sztywno ustalona maksymalna roznice od korelowanego elementu wektora wejsciowego 
+	-> result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery(HLS_VECTOR,0.5,0.5,0.5,importance_matrix,0.2)))
+	"""
+	
+def constructHLSQuery(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
     try:
         arguments = ""
         n = 0
@@ -251,47 +254,6 @@ def constructHLSQuery3(hlsvector,parameter,mask,modificator):
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed returning path from DB"
-
-def constructHLSQuery4(hlsvector,parameter,mask,modificator):
-    try:
-        arguments = "("
-        n = 0
-        cursor = conn.cursor ()
-        for x in range (0,sliceX):
-            for y in range (0,sliceY):
-                if mask[x,y]==1:
-                    h = "h%s" % n
-                    l = "l%s" % n
-                    s = "s%s" % n
-                    n=n+1
-                    arguments = arguments + "(GREATEST(ABS(%s-%s),ABS(%s-%s),ABS(%s-%s)))<(%s-%s)" % (h,str(hlsvector[x,y,0])[0:6],l,str(hlsvector[x,y,1])[0:6],s,str(hlsvector[x,y,2])[0:6],parameter,modificator)
-                    if n != ((sliceX*sliceY)):
-                        arguments = arguments + " AND "
-                    else:
-                        arguments = arguments+" ) "
-                        continue
-                else:
-                    h = "h%s" % n
-                    l = "l%s" % n
-                    s = "s%s" % n
-                    n=n+1
-                    arguments = arguments + "(GREATEST(ABS(%s-%s),ABS(%s-%s),ABS(%s-%s)))<%s" % (h,str(hlsvector[x,y,0])[0:6],l,str(hlsvector[x,y,1])[0:6],s,str(hlsvector[x,y,2])[0:6],parameter)
-                    if n != ((sliceX*sliceY)):
-                        arguments = arguments + " AND "
-                    else:
-                        arguments = arguments+" ) "
-                        continue
-        query = ("""
-        SELECT image_md5 from vectors WHERE
-        %s """) % (arguments)
-        cursor.execute (query)
-        md5 = cursor.fetchall()
-        cursor.close ()
-        return md5
-    except MySQLdb.Error, e:
-        print "Error %d: %s" % (e.args[0], e.args[1])
-        print "Didnt succeed returning path from DB"
-        
 
 
 def returnURLFromMD5(md5):
