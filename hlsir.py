@@ -30,7 +30,7 @@ crawler_img_library = "/home/wojtek/hlsir/img"
 repetitiveness = 0
 
 try:
-    conn = MySQLdb.connect (host = "127.0.0.1", user = "root", passwd = "dup4", db = "crawlerbase")
+    conn = MySQLdb.connect (host = "127.0.0.1", user = "crawleruser", passwd = "dup4", db = "crawler_live")
 except MySQLdb.Error, e:
     print "Error %d: %s" % (e.args[0], e.args[1])
     sys.exit(1)
