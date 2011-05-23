@@ -218,7 +218,7 @@ if data.has_key("file.1"):  # we have uploads.
                     [H,L,S] = hlsir.convertJpgToHlsNumpy(file_jpeg,x,y)
                     HLS_VECTOR[x,y] = [H,L,S]
             """ Yepiee we have hls vector """
-            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0.2,10)))
+            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0.2,5)))
             sorted_image_url = set(result_image_url)
             print "<br><h1>Method2</h1><br>"
             print "<br>"
