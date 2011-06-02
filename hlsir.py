@@ -159,7 +159,6 @@ def constructHLSQuery(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
         SELECT image_md5 from vectors WHERE
         %s """) % (arguments) 
         """print query"""
-
         cursor.execute (query)
         md5 = cursor.fetchall()
         cursor.close ()
@@ -168,6 +167,47 @@ def constructHLSQuery(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed SELECTING vector FROM DB"
+
+def HLSQueryCount(hlsvector,h_weight,l_weight,s_weight,mask,modificator):
+    try:
+        arguments = ""
+        n = 0
+        cursor = conn.cursor ()
+        for x in range (0,sliceX):
+            for y in range (0,sliceY):
+                if mask[x,y]==0:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "ABS(%s-%s)<%s AND ABS(%s-%s)<%s AND ABS(%s-%s)<%s" % (h,str(hlsvector[x,y,0])[0:6],h_weight,l,str(hlsvector[x,
+y,1])[0:6],l_weight,s,str(hlsvector[x,y,2])[0:6],s_weight)
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + " AND "                    
+		    else:
+                        continue
+                else:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "ABS(%s-%s)<(%s-%s) AND ABS(%s-%s)<(%s-%s) AND ABS(%s-%s)<(%s-%s)" % (h,str(hlsvector[x,y,0])[0:6],h_weight,modificator,l,str(hlsvector[x,y,1])[0:6],l_weight,modificator,s,str(hlsvector[x,y,2])[0:6],s_weight,modificator)
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + " AND "
+                    else:                        
+			continue
+        query = ("""
+        SELECT count(image_md5) from vectors WHERE
+        %s """) % (arguments)
+        """print query"""
+        cursor.execute (query)
+        count = int(cursor.fetchone()[0])
+        cursor.close ()
+        return count
+    except MySQLdb.Error, e:
+        print "Error %d: %s" % (e.args[0], e.args[1])
+        print "Didnt succeed SELECTING vector FROM DB"
+
 
 def constructHLSQuery2(hlsvector,mask,modificator,global_deviation):
     """ Suma wszystkich wartosci bezwzglednych odstepstwa wszystkich elementow 
@@ -199,19 +239,65 @@ def constructHLSQuery2(hlsvector,mask,modificator,global_deviation):
                     if n != ((sliceX*sliceY)):
                         arguments = arguments + "+"
                     else:
-                        arguments = arguments+"))) < 13"
+                        arguments = arguments+"))) < %s" % (global_deviation)
                         continue
         query = ("""
         SELECT image_md5 from vectors WHERE
         %s """) % (arguments) 
         """print query"""
         cursor.execute (query)
-        md5 = cursor.fetchall()
+	md5 = cursor.fetchall()
         cursor.close ()
         return md5
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed SELECTING vector FROM DB"
+
+def HLSQuery2Count(hlsvector,mask,modificator,global_deviation):
+    """ Suma wszystkich wartosci bezwzglednych odstepstwa wszystkich elementow 
+    kazdego wektora od kazdego elementu wektora wejsciowego
+    mniejsza od np. 15  """
+    try:
+        arguments = "(SELECT(MIN("
+        n = 0
+        cursor = conn.cursor ()
+        for x in range (0,sliceX):
+            for y in range (0,sliceY):
+                if mask[x,y]==1:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "ABS(%s-(%s+%s))+ABS(%s-(%s+%s))+ABS(%s-(%s+%s))" % (h,str(hlsvector[x,y,0])[0:6],modificator,l,str(hlsvector[x,y,1])[0:6],modificator,s,str(hlsvector[x,y,2])[0:6],modificator)
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + "+"
+                    else:
+                        arguments = arguments+"))) < %s" % (global_deviation)
+                        continue
+                else:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "ABS(%s-%s)+ABS(%s-%s)+ABS(%s-%s)" % (h,str(hlsvector[x,y,0])[0:6],l,str(hlsvector[x,y,1])[0:6],s,str(hlsvector[x,y,2])[0:6])
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + "+"
+                    else:
+                        arguments = arguments+"))) < %s" % (global_deviation)
+                        continue
+        query = ("""
+        SELECT count(image_md5) from vectors WHERE
+        %s """) % (arguments)
+        """print query"""
+        cursor.execute (query)
+        count = int(cursor.fetchone()[0])
+        cursor.close ()
+        return count
+    except MySQLdb.Error, e:
+        print "Error %d: %s" % (e.args[0], e.args[1])
+        print "Didnt succeed SELECTING vector FROM DB"
+
+
 def constructHLSQuery3(hlsvector,parameter,mask,modificator):
     """Suma errorow na elementach kazdego wektora (slice'a) musi byc mniejsza
     od ustalonego parametru """
@@ -251,6 +337,49 @@ def constructHLSQuery3(hlsvector,parameter,mask,modificator):
         md5 = cursor.fetchall()
         cursor.close ()
         return md5
+    except MySQLdb.Error, e:
+        print "Error %d: %s" % (e.args[0], e.args[1])
+        print "Didnt succeed returning path from DB"
+
+def HLSQuery3Count(hlsvector,parameter,mask,modificator):
+    """Suma errorow na elementach kazdego wektora (slice'a) musi byc mniejsza
+    od ustalonego parametru """
+    try:
+        arguments = "("
+        n = 0
+        cursor = conn.cursor ()
+        for x in range (0,sliceX):
+            for y in range (0,sliceY):
+                if mask[x,y] == 1:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "(SELECT SUM(ABS(%s-%s)+ABS(%s-%s)+ABS(%s-%s)))<(%s-%s)" % (h,str(hlsvector[x,y,0])[0:6],l,str(hlsvector[x,y,1])[0:6],s,str(hlsvector[x,y,2])[0:6],parameter,modificator)
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + " AND "
+                    else:
+                        arguments = arguments+" ) "
+                        continue
+                else:
+                    h = "h%s" % n
+                    l = "l%s" % n
+                    s = "s%s" % n
+                    n=n+1
+                    arguments = arguments + "(SELECT SUM(ABS(%s-%s)+ABS(%s-%s)+ABS(%s-%s)))<%s" % (h,str(hlsvector[x,y,0])[0:6],l,str(hlsvector[x,y,1])[0:6],s,str(hlsvector[x,y,2])[0:6],parameter)
+                    if n != ((sliceX*sliceY)):
+                        arguments = arguments + " AND "
+                    else:
+                        arguments = arguments+" ) "
+                        continue
+        query = ("""
+        SELECT count(image_md5) from vectors WHERE
+        %s """) % (arguments)
+        """print query"""
+        cursor.execute (query)
+        count = cursor.fetchone()
+        cursor.close ()
+        return int(count[0])
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         print "Didnt succeed returning path from DB"

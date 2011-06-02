@@ -172,7 +172,7 @@ if data.has_key("file.1"):  # we have uploads.
                         if item == fname:
                             importance_matrix[x,y]=1
                         idx+=1
-            print "Importance matrix : %s" % (importance_matrix)
+            """print "Importance matrix : %s" % (importance_matrix)"""
             
             o = open(dirUpload+os.sep+fn,"wb")
             o.write(data[key].value)
@@ -188,18 +188,36 @@ if data.has_key("file.1"):  # we have uploads.
                 file_jpeg = imagefile
                 height = hlsir.reportShapeInfo(imagefile)[1] 
                 width = hlsir.reportShapeInfo(imagefile)[0]
-            
+           
+            a = time.time()
             for x in range(0,hlsir.sliceX):
                 for y in range(0,hlsir.sliceY):
                     [H,L,S] = hlsir.convertJpgToHlsNumpy(file_jpeg,x,y)
                     HLS_VECTOR[x,y] = [H,L,S]
             
-            print "<br>Source image:<br> <img src=upload/%s width=20%% height=20%%>" % (fn)
+            print "<br><h1>Source image</h1><br> <img src=upload/%s width=20%% height=20%%>" % (fn)
             """ method 1 """
-            a = time.time()
-            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery(HLS_VECTOR,0.5,0.5,0.5,importance_matrix,0.4)))
+            
+	    basetreshold = 0.95
+	    iterator = 0.05
+	    imagescount = 0
+	    imagescount = hlsir.HLSQueryCount(HLS_VECTOR,basetreshold,basetreshold,basetreshold,importance_matrix,basetreshold)
+	    result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery(HLS_VECTOR,1,1,1,importance_matrix,basetreshold)))
             sorted_image_url = set(result_image_url)
-            print "<h1>Method1</h1>"
+ 
+	    while True:
+		if (imagescount > 0) and (imagescount < 20):
+			result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery(HLS_VECTOR,basetreshold,basetreshold,basetreshold,importance_matrix,basetreshold)))
+			sorted_image_url = set(result_image_url)
+			break
+		elif basetreshold < 0.2:
+		 	break
+       		else:
+                        basetreshold -= iterator
+                        imagescount = hlsir.HLSQueryCount(HLS_VECTOR,basetreshold,basetreshold,basetreshold,importance_matrix,basetreshold)
+
+     
+	    print "<h1>First method result</h1>"
             print "<br>"
             print "Method 1 : We have 25 HLS input vectors. ",
             print "Each value of HLS vector is compared to each value of HLS input vector. ",
@@ -218,9 +236,28 @@ if data.has_key("file.1"):  # we have uploads.
                     [H,L,S] = hlsir.convertJpgToHlsNumpy(file_jpeg,x,y)
                     HLS_VECTOR[x,y] = [H,L,S]
             """ Yepiee we have hls vector """
-            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0.2,5)))
+            basetreshold = 1
+            iterator = 0.5
+            imagescount = 0
+	    result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0,basetreshold)))
+	    imagescount = hlsir.HLSQuery2Count(HLS_VECTOR,importance_matrix,0,basetreshold)
             sorted_image_url = set(result_image_url)
-            print "<br><h1>Method2</h1><br>"
+
+            while True:
+                if (imagescount > 0) and (imagescount < 30):
+                        result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0.2,basetreshold)))
+            		sorted_image_url = set(result_image_url)
+			break
+                elif basetreshold > 13 :
+                        break
+                else:
+                        basetreshold += iterator
+			imagescount = hlsir.HLSQuery2Count(HLS_VECTOR,importance_matrix,0,basetreshold)
+ 
+	    """result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery2(HLS_VECTOR,importance_matrix,0.2,2)))
+            sorted_image_url = set(result_image_url)"""
+ 
+            print "<br><h1>Second method best results</h1><br>"
             print "<br>"
             print "Method 2 : We have 25 HLS input vectors. ",
             print "Each value of HLS vector is compared to each value of HLS input vector. ",
@@ -239,9 +276,33 @@ if data.has_key("file.1"):  # we have uploads.
                     [H,L,S] = hlsir.convertJpgToHlsNumpy(file_jpeg,x,y)
                     HLS_VECTOR[x,y] = [H,L,S]
             """ Yepiee we have hls vector """
-            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery3(HLS_VECTOR,0.5,importance_matrix,0.4)))
+	    
+	    basetreshold = 0.04
+            iterator = 0.04
+            imagescount = 0
+            result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery3(HLS_VECTOR,basetreshold,importance_matrix,0)))
+            imagescount = hlsir.HLSQuery3Count(HLS_VECTOR,basetreshold,importance_matrix,0)
             sorted_image_url = set(result_image_url)
-            print "<br><h1>Method3</h1><br>"
+
+
+            while True:
+                if (imagescount > 0) and (imagescount < 50):
+                        result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery3(HLS_VECTOR,basetreshold,importance_matrix,0)))
+                        sorted_image_url = set(result_image_url)
+                        break
+                elif basetreshold > 3 :
+                        break
+                else:
+                        basetreshold += iterator
+                        imagescount = hlsir.HLSQuery3Count(HLS_VECTOR,basetreshold,importance_matrix,0)
+
+
+            """result_image_url = set(hlsir.returnURLFromMD5(hlsir.constructHLSQuery3(HLS_VECTOR,0.5,importance_matrix,0.4)))
+            sorted_image_url = set(result_image_url)"""
+
+
+
+            print "<br><h1>Third method results</h1><br>"
             print "<br>"
             print "Method 3 : We have 25 HLS input vectors. ",
             print "Each value of HLS vector is compared to each value of HLS input vector. ",
@@ -253,7 +314,6 @@ if data.has_key("file.1"):  # we have uploads.
             delta = b - a
             print "<br>It took %s seconds to perform query<br>" % (delta) 
             
-            a = time.time()
       
             
             kbList.append(len(data[key].value))
